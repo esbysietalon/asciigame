@@ -22,7 +22,7 @@ char Atlas::getAt(int x, int y)
 
 void Atlas::create(int w, int h) {
 	Map* map = new Map(w, h);
-	generate(map, map_t::HALLWAYS);
+	generate(map, map_t::ROOMS);
 	maps->push_back(map);
 }
 

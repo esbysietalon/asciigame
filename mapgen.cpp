@@ -2,6 +2,7 @@
 #include "mapgen.h"
 #include "rng.h"
 #include <iostream>
+#include <array>
 MapGen::MapGen()
 {
 
@@ -45,6 +46,80 @@ void MapGen::recurseHallways(char** map, int x, int y, int dir, int level) {
 		}
 	}
 }
+
+struct Room_t {
+	
+	int x, y, w, h;
+	Room_t(int a, int b, int c, int d) {
+		x = a;
+		y = b;
+		w = c;
+		h = d;
+	}
+};
+
+void MapGen::placeRooms(char** map) {
+	std::uniform_int_distribution<> randx(0, MAP_WIDTH);
+	std::uniform_int_distribution<> randy(0, MAP_HEIGHT);
+	std::uniform_int_distribution<> randr(MINROOMLEN, MAXROOMLEN);
+	int x, y, w, h;
+	std::array<Room_t*, ROOMSNUM>* rooms = new std::array<Room_t*, ROOMSNUM>();
+	for (int i = 0; i < ROOMSNUM; i++) {
+		w = randr(rng);
+		h = randr(rng);
+		x = randx(rng);
+		y = randy(rng);
+		if (x < 1) {
+			x = 1;
+		}
+		if (x > MAP_WIDTH - w - 2) {
+			x = MAP_WIDTH - w - 2;
+		}
+		if (y < 1) {
+			y = 1;
+		}
+		if (y > MAP_HEIGHT - h - 2) {
+			y = MAP_HEIGHT - h - 2;
+		}
+		(*rooms)[i] = new Room_t(x, y, w, h);
+		for (int iy = y; iy < y + h; iy++) {
+			for (int ix = x; ix < x + w; ix++) {
+				(*map)[ix + iy * MAP_WIDTH] = terrain_t::EMPTY;
+			}
+		}
+	}
+	std::shuffle(rooms->begin(), rooms->end(), rng);
+	for (int i = 0; i < ROOMSNUM; i++) {
+		int sx = (*rooms)[i % ROOMSNUM]->x + (*rooms)[i % ROOMSNUM]->w / 2;
+		int sy = (*rooms)[i % ROOMSNUM]->y + (*rooms)[i % ROOMSNUM]->h / 2;
+		int ex = (*rooms)[(i + 1) % ROOMSNUM]->x + (*rooms)[(i + 1) % ROOMSNUM]->w / 2;
+		int ey = (*rooms)[(i + 1) % ROOMSNUM]->y + (*rooms)[(i + 1) % ROOMSNUM]->h / 2;
+		if (random() > 0.5) {
+			int j = sx;
+			while (j != ex) {
+				(*map)[j + sy * MAP_WIDTH] = terrain_t::EMPTY;
+				j += (ex - sx) / abs(ex - sx);
+			}
+			j = sy;
+			while (j != ey) {
+				(*map)[ex + j * MAP_WIDTH] = terrain_t::EMPTY;
+				j += (ey - sy) / abs(ey - sy);
+			}
+		}
+		else {
+			int j = sy;
+			while (j != ey) {
+				(*map)[sx + j * MAP_WIDTH] = terrain_t::EMPTY;
+				j += (ey - sy) / abs(ey - sy);
+			}
+			j = sx;
+			while (j != ex) {
+				(*map)[j + ey * MAP_WIDTH] = terrain_t::EMPTY;
+				j += (ex - sx) / abs(ex - sx);
+			}
+		}
+	}
+}
 void MapGen::generate(char ** map, int w, int h, int type)
 {
 	std::uniform_int_distribution<> randw(0, MAP_WIDTH);
@@ -60,11 +135,12 @@ void MapGen::generate(char ** map, int w, int h, int type)
 			(*map)[i] = terrain_t::WALL;
 		for (int i = 0; i < HALLSNUM; i++) {
 			recurseHallways(map, randw(rng), randh(rng), randd(rng), 0);
-			recurseHallways(map, randw(rng), randh(rng), randd(rng), 0);
-			recurseHallways(map, randw(rng), randh(rng), randd(rng), 0);
 		}
 		break;
 	case 2:
+		for (int i = 0; i < w*h; i++)
+			(*map)[i] = terrain_t::WALL;
+		placeRooms(map);
 		break;
 	}
 	

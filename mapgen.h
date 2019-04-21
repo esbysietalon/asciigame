@@ -16,5 +16,6 @@ private:
 	std::uniform_real_distribution<> distr;
 	double random();
 
+	void placeRooms(char** map);
 	void recurseHallways(char** map, int x, int y, int dir, int level);
 };
