@@ -6,8 +6,11 @@ public:
 	~Actor();
 
 	void assume();
+	bool getAIState();
 	int getX();
 	int getY();
+	void setX(int num);
+	void setY(int num);
 	char getLabel();
 	int getIndex();
 private:

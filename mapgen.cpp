@@ -22,6 +22,8 @@ void MapGen::recurseHallways(char** map, int x, int y, int dir, int level) {
 		return;
 	}
 	while (random() > 0.01 * currLen && x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
+		if (x == 0 || x == MAP_WIDTH - 1 || y == 0 || y == MAP_HEIGHT - 1)
+			break;
 		(*map)[x + y * MAP_WIDTH] = terrain_t::EMPTY;
 		currLen++;
 		switch (dir) {
@@ -99,11 +101,17 @@ void MapGen::placeRooms(char** map) {
 			while (j != ex) {
 				(*map)[j + sy * MAP_WIDTH] = terrain_t::EMPTY;
 				j += (ex - sx) / abs(ex - sx);
+				if (random() > 0.9) {
+					recurseHallways(map, j, sy, (random() > 0.5 ? 0 : 2), 0);
+				}
 			}
 			j = sy;
 			while (j != ey) {
 				(*map)[ex + j * MAP_WIDTH] = terrain_t::EMPTY;
 				j += (ey - sy) / abs(ey - sy);
+				if (random() > 0.9) {
+					recurseHallways(map, ex, j, (random() > 0.5 ? 1 : 3), 0);
+				}
 			}
 		}
 		else {
@@ -111,11 +119,17 @@ void MapGen::placeRooms(char** map) {
 			while (j != ey) {
 				(*map)[sx + j * MAP_WIDTH] = terrain_t::EMPTY;
 				j += (ey - sy) / abs(ey - sy);
+				if (random() > 0.9) {
+					recurseHallways(map, sx, j, (random() > 0.5 ? 1 : 3), 0);
+				}
 			}
 			j = sx;
 			while (j != ex) {
 				(*map)[j + ey * MAP_WIDTH] = terrain_t::EMPTY;
 				j += (ex - sx) / abs(ex - sx);
+				if (random() > 0.9) {
+					recurseHallways(map, j, ey, (random() > 0.5 ? 0 : 2), 0);
+				}
 			}
 		}
 	}
