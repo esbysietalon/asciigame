@@ -70,12 +70,14 @@ void Overseer::init()
 		actors->front()->assume();
 }
 
-bool Overseer::isOccupied(int x, int y){
+bool Overseer::isOccupied(int x, int y, int actor){
 	int index = x + y * MAP_WIDTH;
 	if(world->getAt(x, y) != terrain_t::EMPTY){
 		return true;
 	}
 	for(int i = 0; i < actors->size(); i++){
+		if (actor == i)
+			continue;
 		if (index == actors->at(i)->getIndex()) {
 			return true;
 		}
@@ -151,7 +153,7 @@ void Overseer::update() {
 			switch (input) {
 			case 'q':
 			case 'Q':
-				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() - 1)) {
+				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() - 1, i)) {
 					actors->at(i)->setX(actors->at(i)->getX() - 1);
 					actors->at(i)->setY(actors->at(i)->getY() - 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northwest.\n";
@@ -163,7 +165,7 @@ void Overseer::update() {
 				break;
 			case 'w':
 			case 'W':
-				if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() - 1)) {
+				if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() - 1, i)) {
 					actors->at(i)->setY(actors->at(i)->getY() - 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves north.\n";
 				}
@@ -173,7 +175,7 @@ void Overseer::update() {
 				break;
 			case 'e':
 			case 'E':
-				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() - 1)) {
+				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() - 1, i)) {
 					actors->at(i)->setX(actors->at(i)->getX() + 1);
 					actors->at(i)->setY(actors->at(i)->getY() - 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northeast.\n";
@@ -184,7 +186,7 @@ void Overseer::update() {
 				break;
 			case 'a':
 			case 'A':
-				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY())) {
+				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY(), i)) {
 					actors->at(i)->setX(actors->at(i)->getX() - 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves west.\n";
 				}
@@ -194,7 +196,7 @@ void Overseer::update() {
 				break;
 			case 's':
 			case 'S':
-				if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() + 1)) {
+				if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() + 1, i)) {
 					actors->at(i)->setY(actors->at(i)->getY() + 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves south.\n";
 				}
@@ -204,7 +206,7 @@ void Overseer::update() {
 				break;
 			case 'd':
 			case 'D':
-				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY())) {
+				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY(), i)) {
 					actors->at(i)->setX(actors->at(i)->getX() + 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves east.\n";
 				}
@@ -214,7 +216,7 @@ void Overseer::update() {
 				break;
 			case 'z':
 			case 'Z':
-				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() + 1)) {
+				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() + 1, i)) {
 					actors->at(i)->setX(actors->at(i)->getX() - 1);
 					actors->at(i)->setY(actors->at(i)->getY() + 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southwest.\n";
@@ -225,7 +227,7 @@ void Overseer::update() {
 				break;
 			case 'c':
 			case 'C':
-				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() + 1)) {
+				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() + 1, i)) {
 					actors->at(i)->setX(actors->at(i)->getX() + 1);
 					actors->at(i)->setY(actors->at(i)->getY() + 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southeast.\n";

@@ -28,7 +28,7 @@ private:
 
 	DWORD getInput(INPUT_RECORD** eventBuffer);
 
-	bool isOccupied(int x, int y);
+	bool isOccupied(int x, int y, int actor=-1);
 
 	std::uniform_real_distribution<> distr;
 	double random();
