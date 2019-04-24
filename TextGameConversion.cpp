@@ -17,8 +17,8 @@ int main(int argc, char** argv)
 	CONSOLE_FONT_INFOEX cfi;
 	cfi.cbSize = sizeof(cfi);
 	cfi.nFont = 0;
-	cfi.dwFontSize.X = 10;                   // Width of each character in the font
-	cfi.dwFontSize.Y = 10;                  // Height
+	cfi.dwFontSize.X = 8;                   // Width of each character in the font
+	cfi.dwFontSize.Y = 9;                  // Height
 	cfi.FontFamily = FF_DONTCARE;
 	cfi.FontWeight = FW_NORMAL;
 	std::wcscpy(cfi.FaceName, L"Raster Fonts"); // Choose your font
@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 	HWND console = GetConsoleWindow();
 	RECT r;
 	GetWindowRect(console, &r);
-	MoveWindow(console, r.left, r.top, WINDOW_WIDTH, WINDOW_HEIGHT, TRUE);
+	MoveWindow(console, r.left, r.top, WINDOW_WIDTH - 157, WINDOW_HEIGHT - 61, TRUE);
 
 
 	HANDLE loggerPipe;

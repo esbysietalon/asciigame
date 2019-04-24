@@ -25,7 +25,8 @@ private:
 	void enterActor(Actor* actor);
 	void populate();
 	void update();
-	void printLegend();
+
+	DWORD getInput(INPUT_RECORD** eventBuffer);
 
 	bool isOccupied(int x, int y);
 
@@ -39,11 +40,22 @@ private:
 	HANDLE usedPipe = NULL;
 	HANDLE usedPipe_s = NULL;
 
+	HANDLE wHnd, rHnd;
+	COORD characterBufferSize, bufferSize;
+	COORD characterPosition;
+	SMALL_RECT consoleWriteArea;
+	SMALL_RECT windowSize;
+
+	INPUT_RECORD* eventBuffer;
+	
 	DWORD dwWritten;
 	DWORD dwWritten_s;
 
+	char* legend = "Press x to exit. Press 'qweasdzc' to navigate.\n";
 
 	char input;
+
+	CHAR_INFO* consoleBuffer;
 
 	std::string prefix_s = "> ";
 
