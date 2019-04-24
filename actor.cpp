@@ -6,7 +6,7 @@ Actor::Actor(int t, int tt)
 	x = t;
 	y = tt;
 	ai = true;
-	label = 0xDB;
+	label = 'X';//0xDB;
 }
 
 void Actor::assume()

@@ -71,8 +71,6 @@ void Overseer::init()
 }
 
 bool Overseer::isOccupied(int x, int y){
-	if (actors->size() > 0)
-		std::sort(actors->begin(), actors->end(), actor_pos_sort);
 	int index = x + y * MAP_WIDTH;
 	if(world->getAt(x, y) != terrain_t::EMPTY){
 		return true;
@@ -80,9 +78,6 @@ bool Overseer::isOccupied(int x, int y){
 	for(int i = 0; i < actors->size(); i++){
 		if (index == actors->at(i)->getIndex()) {
 			return true;
-		}
-		if(index < actors->at(i)->getIndex()){
-			return false;
 		}
 	}
 	return false;
@@ -156,7 +151,7 @@ void Overseer::update() {
 			switch (input) {
 			case 'q':
 			case 'Q':
-				if (world->getAt(actors->at(i)->getX() - 1, actors->at(i)->getY() - 1) == terrain_t::EMPTY) {
+				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() - 1)) {
 					actors->at(i)->setX(actors->at(i)->getX() - 1);
 					actors->at(i)->setY(actors->at(i)->getY() - 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northwest.\n";
@@ -168,7 +163,7 @@ void Overseer::update() {
 				break;
 			case 'w':
 			case 'W':
-				if (world->getAt(actors->at(i)->getX(), actors->at(i)->getY() - 1) == terrain_t::EMPTY) {
+				if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() - 1)) {
 					actors->at(i)->setY(actors->at(i)->getY() - 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves north.\n";
 				}
@@ -178,7 +173,7 @@ void Overseer::update() {
 				break;
 			case 'e':
 			case 'E':
-				if (world->getAt(actors->at(i)->getX() + 1, actors->at(i)->getY() - 1) == terrain_t::EMPTY) {
+				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() - 1)) {
 					actors->at(i)->setX(actors->at(i)->getX() + 1);
 					actors->at(i)->setY(actors->at(i)->getY() - 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northeast.\n";
@@ -189,7 +184,7 @@ void Overseer::update() {
 				break;
 			case 'a':
 			case 'A':
-				if (world->getAt(actors->at(i)->getX() - 1, actors->at(i)->getY()) == terrain_t::EMPTY) {
+				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY())) {
 					actors->at(i)->setX(actors->at(i)->getX() - 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves west.\n";
 				}
@@ -199,7 +194,7 @@ void Overseer::update() {
 				break;
 			case 's':
 			case 'S':
-				if (world->getAt(actors->at(i)->getX(), actors->at(i)->getY() + 1) == terrain_t::EMPTY) {
+				if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() + 1)) {
 					actors->at(i)->setY(actors->at(i)->getY() + 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves south.\n";
 				}
@@ -209,7 +204,7 @@ void Overseer::update() {
 				break;
 			case 'd':
 			case 'D':
-				if (world->getAt(actors->at(i)->getX() + 1, actors->at(i)->getY()) == terrain_t::EMPTY) {
+				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY())) {
 					actors->at(i)->setX(actors->at(i)->getX() + 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves east.\n";
 				}
@@ -219,7 +214,7 @@ void Overseer::update() {
 				break;
 			case 'z':
 			case 'Z':
-				if (world->getAt(actors->at(i)->getX() - 1, actors->at(i)->getY() + 1) == terrain_t::EMPTY) {
+				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() + 1)) {
 					actors->at(i)->setX(actors->at(i)->getX() - 1);
 					actors->at(i)->setY(actors->at(i)->getY() + 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southwest.\n";
@@ -230,7 +225,7 @@ void Overseer::update() {
 				break;
 			case 'c':
 			case 'C':
-				if (world->getAt(actors->at(i)->getX() + 1, actors->at(i)->getY() + 1) == terrain_t::EMPTY) {
+				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() + 1)) {
 					actors->at(i)->setX(actors->at(i)->getX() + 1);
 					actors->at(i)->setY(actors->at(i)->getY() + 1);
 					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southeast.\n";
