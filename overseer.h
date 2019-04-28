@@ -50,7 +50,7 @@ private:
 	void parseInput(int index, std::string* std_tell, char in);
 	void think(int index, std::string* std_tell);
 	
-	void dijkstraesque(int sx, int sy, int ex, int ey);
+	void dijkstraesque(int index, int sx, int sy, int ex, int ey);
 
 	DWORD getInput(INPUT_RECORD** eventBuffer);
 
@@ -78,7 +78,9 @@ private:
 	DWORD dwWritten_s;
 
 	char* legend = "Press x to exit. Press 'qweasdzc' to navigate.\n";
-	std::vector<char> path;
+	//std::vector<char> path;
+
+	std::vector<std::vector<char>> paths;
 
 	char input;
 

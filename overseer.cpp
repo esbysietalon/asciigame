@@ -68,6 +68,10 @@ void Overseer::init()
 	populate();
 	if(actors->size() > 0)
 		actors->front()->assume();
+	for (int i = 0; i < actors->size(); i++) {
+		std::vector<char> path;
+		paths.push_back(path);
+	}
 }
 
 bool Overseer::isOccupied(int x, int y, int actor){
@@ -332,8 +336,10 @@ void add_to_path(char** path, int* len, int* size, char item) {
 	(*path)[*len] = item;
 	(*len)++;
 }
-void Overseer::dijkstraesque(int sx, int sy, int ex, int ey) {
-	path.clear();
+void Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
+	//std::cout << paths.size() << " out of " << (index) << std::endl;
+	paths.at(index).clear();
+	
 	intpair_t currpoint(sx, sy);
 	intpair_t endpoint(ex, ey);
 	intpair_t* floodMap = new intpair_t[MAP_WIDTH*MAP_HEIGHT];
@@ -372,6 +378,7 @@ void Overseer::dijkstraesque(int sx, int sy, int ex, int ey) {
 		points.pop();
 		for (int ix = -1; ix <= 1; ix++) {
 			for (int iy = -1; iy <= 1; iy++) {
+				//bool pass = false;
 				if (ix == 0 && iy == 0)
 					continue;
 				if ((x + ix) < 0 || (x + ix) >= MAP_WIDTH || (y + iy) < 0 || (y + iy) >= MAP_HEIGHT)
@@ -380,97 +387,101 @@ void Overseer::dijkstraesque(int sx, int sy, int ex, int ey) {
 					continue;
 				if (world->getAt(x + ix, y + iy) != terrain_t::EMPTY)
 					continue;
-				intpair_t thispoint(x + ix, y + iy);
-				switch (ix) {
-				case -1:
-					switch (iy) {
+				//if (!pass) {
+					intpair_t thispoint(x + ix, y + iy);
+					switch (ix) {
 					case -1:
-						thispoint.move = 'q';
-						if (x == sx && y == sy)
-							thispoint.origin = 'q';
-						else
-							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+						switch (iy) {
+						case -1:
+							thispoint.move = 'q';
+							if (x == sx && y == sy)
+								thispoint.origin = 'q';
+							else
+								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+							break;
+						case 0:
+							thispoint.move = 'a';
+							if (x == sx && y == sy)
+								thispoint.origin = 'a';
+							else
+								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+							break;
+						case 1:
+							thispoint.move = 'z';
+							if (x == sx && y == sy)
+								thispoint.origin = 'z';
+							else
+								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+							break;
+						}
 						break;
 					case 0:
-						thispoint.move = 'a';
-						if (x == sx && y == sy)
-							thispoint.origin = 'a';
-						else
-							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+						switch (iy) {
+						case -1:
+							thispoint.move = 'w';
+							if (x == sx && y == sy)
+								thispoint.origin = 'w';
+							else
+								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
 
+							break;
+						case 0:
+							break;
+						case 1:
+							thispoint.move = 's';
+							if (x == sx && y == sy)
+								thispoint.origin = 's';
+							else
+								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+							break;
+						}
 						break;
 					case 1:
-						thispoint.move = 'z';
-						if (x == sx && y == sy)
-							thispoint.origin = 'z';
-						else
-							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+						switch (iy) {
+						case -1:
+							thispoint.move = 'e';
+							if (x == sx && y == sy)
+								thispoint.origin = 'e';
+							else
+								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
 
+							break;
+						case 0:
+							thispoint.move = 'd';
+							if (x == sx && y == sy)
+								thispoint.origin = 'd';
+							else
+								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+							break;
+						case 1:
+							thispoint.move = 'c';
+							if (x == sx && y == sy)
+								thispoint.origin = 'c';
+							else
+								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+							break;
+						}
 						break;
 					}
-					break;
-				case 0:
-					switch (iy) {
-					case -1:
-						thispoint.move = 'w';
-						if (x == sx && y == sy)
-							thispoint.origin = 'w';
-						else
-							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-						break;
-					case 0:
-						break;
-					case 1:
-						thispoint.move = 's';
-						if (x == sx && y == sy)
-							thispoint.origin = 's';
-						else
-							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-						break;
-					}
-					break;
-				case 1:
-					switch (iy) {
-					case -1:
-						thispoint.move = 'e';
-						if (x == sx && y == sy)
-							thispoint.origin = 'e';
-						else
-							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-						break;
-					case 0:
-						thispoint.move = 'd';
-						if (x == sx && y == sy)
-							thispoint.origin = 'd';
-						else
-							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-						break;
-					case 1:
-						thispoint.move = 'c';
-						if (x == sx && y == sy)
-							thispoint.origin = 'c';
-						else
-							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-						break;
-					}
-					break;
-				}
-				thispoint.parent = x + y * MAP_WIDTH;
-				points.push(thispoint);
+					thispoint.parent = x + y * MAP_WIDTH;
+					points.push(thispoint);
+				//}
 			}
 		}
 	}
+	std::string reportstr = "\nMADE IT HERE\n";
+	report(reportstr.data(), reportstr.length());
 	int cx = sx;
 	int cy = sy;
 	bool emergencybrake = false;
 	while (cx != ex && cy != ey) {
 		//std::cout << "cx: " << cx << " cy: " << cy << std::endl;
-		path.push_back(floodMap[cx + cy * MAP_WIDTH].move);
+		paths.at(index).push_back(floodMap[cx + cy * MAP_WIDTH].move);
 		std::string str = floodMap[cx + cy * MAP_WIDTH].move+"";
 		//report(str.data(), str.length());
 		switch (floodMap[cx + cy * MAP_WIDTH].move) {
@@ -527,16 +538,16 @@ void Overseer::think(int i, std::string* str_tell) {
 			ex = randw(rng);
 			ey = randh(rng);
 		}
-		dijkstraesque(ax, ay, ex, ey);
+		dijkstraesque(i, ax, ay, ex, ey);
 		std::string str_report;
-		for (int i = 0; i < path.size(); i++) {
-			str_report += path.at(i);
+		for (int ii = 0; ii < paths.at(i).size(); ii++) {
+			str_report += paths.at(i).at(ii);
 		}
 		str_report += '\n';
 		//report(str_report.data(), str_report.length());
 		actor->setAIState(aistate_t::SEARCHING);
 	}
-	switch(actor->getAIState){
+	switch(actor->getAIState()){
 	case aistate_t::READY:
 		*str_tell = prefix_s + "Actor " + std::to_string(i) + " sits around and does nothing.\n";
 		break;
@@ -556,12 +567,12 @@ void Overseer::update() {
 	for (int i = 0; i < actors->size(); i++) {
 		if (actors->at(i)->getAIState()) {
 			think(i, &str_tell);
-			if (path.size() > 0) {
-				parseInput(i, &str_tell, path.front());
-				path.erase(path.begin());
+			if (paths.at(i).size() > 0) {
+				parseInput(i, &str_tell, paths.at(i).front());
+				paths.at(i).erase(paths.at(i).begin());
 				
 			}
-			if (path.size() == 0) {
+			if (paths.at(i).size() == 0) {
 				actors->at(i)->setAIState(aistate_t::READY);
 			}
 		}	
