@@ -336,7 +336,7 @@ void add_to_path(char** path, int* len, int* size, char item) {
 	(*path)[*len] = item;
 	(*len)++;
 }
-void Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
+bool Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 	//std::cout << paths.size() << " out of " << (index) << std::endl;
 	paths.at(index).clear();
 	
@@ -354,6 +354,8 @@ void Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 	auto cmp = [](intpair_t a, intpair_t b) { return a.cost < b.cost; };
 	std::priority_queue < intpair_t, std::vector<intpair_t>, decltype(cmp)> points(cmp);
 	
+	bool reachable = false;
+
 	std::queue<char> movechain;
 	points.push(currpoint);
 	while (points.size() > 0) {
@@ -389,6 +391,7 @@ void Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 		*/
 		if (x == ex && y == ey) {
 			floodMap[sx + sy * MAP_WIDTH].move = points.top().origin;
+			reachable = true;
 			break;
 		}
 		points.pop();
@@ -507,7 +510,7 @@ void Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 	char move = ' ';
 	bool emergencybrake = false;
 	reportstr = "";
-	while (true) {
+	while (reachable) {
 		//std::cout << "(" << cx << ", " << cy << ") "; //<< sx << " " << sy << " " << ex << " " << ey << std::endl;
 		//reportstr = "<" + std::to_string(cx) + "|" + std::to_string(cy) + ">" + reportstr;
 		reportstr += "<" + std::to_string(cx) + "|" + std::to_string(cy) + ">";
@@ -578,6 +581,7 @@ void Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 	report(reportstr.data(), reportstr.length());
 	reportstr = "\nACTOR GOAL AT <" + std::to_string(sx) + "|" + std::to_string(sy) + ">\n";
 	report(reportstr.data(), reportstr.length());
+	return reachable;
 }
 void Overseer::think(int i, std::string* str_tell) {
 	Actor* actor = actors->at(i);
@@ -599,14 +603,15 @@ void Overseer::think(int i, std::string* str_tell) {
 			ey = randh(rng);
 		}
 	
-		dijkstraesque(i, ex, ey, ax, ay);
-		std::string str_report;
-		for (int ii = 0; ii < paths.at(i).size(); ii++) {
-			str_report += paths.at(i).at(ii);
+		if (dijkstraesque(i, ex, ey, ax, ay)) {
+			std::string str_report;
+			for (int ii = 0; ii < paths.at(i).size(); ii++) {
+				str_report += paths.at(i).at(ii);
+			}
+			str_report += '\n';
+			//report(str_report.data(), str_report.length());
+			actor->setAIState(aistate_t::SEARCHING);
 		}
-		str_report += '\n';
-		//report(str_report.data(), str_report.length());
-		actor->setAIState(aistate_t::SEARCHING);
 	}
 	switch(actor->getAIState()){
 	case aistate_t::READY:

@@ -56,7 +56,7 @@ private:
 	void parseInput(int index, std::string* std_tell, char in);
 	void think(int index, std::string* std_tell);
 	
-	void dijkstraesque(int index, int sx, int sy, int ex, int ey);
+	bool dijkstraesque(int index, int sx, int sy, int ex, int ey);
 
 	DWORD getInput(INPUT_RECORD** eventBuffer);
 
