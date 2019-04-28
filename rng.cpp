@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "rng.h"
 std::mt19937 rng;
-void initRNG()
+void initRNG(long seed)
 {
-	rng.seed(time(NULL));
+	rng.seed(seed);
 }

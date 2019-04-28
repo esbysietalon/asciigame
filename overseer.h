@@ -97,4 +97,6 @@ private:
 	Atlas* world;
 
 	std::vector<Actor*>* actors;
+
+	std::vector<intpair_t>* honeys;
 };

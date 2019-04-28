@@ -24,7 +24,7 @@ void MapGen::recurseHallways(char** map, int x, int y, int dir, int level) {
 	while (random() > 0.01 * currLen && x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
 		if (x == 0 || x == MAP_WIDTH - 1 || y == 0 || y == MAP_HEIGHT - 1)
 			break;
-		(*map)[x + y * MAP_WIDTH] = terrain_t::EMPTY;
+		(*map)[x + y * MAP_WIDTH] = random() > MUDCOEFF ? terrain_t::EMPTY : terrain_t::MUD;
 		currLen++;
 		switch (dir) {
 		case 0:
@@ -86,7 +86,7 @@ void MapGen::placeRooms(char** map) {
 		(*rooms)[i] = new Room_t(x, y, w, h);
 		for (int iy = y; iy < y + h; iy++) {
 			for (int ix = x; ix < x + w; ix++) {
-				(*map)[ix + iy * MAP_WIDTH] = terrain_t::EMPTY;
+				(*map)[ix + iy * MAP_WIDTH] = random() > MUDCOEFF ? terrain_t::EMPTY : terrain_t::MUD;
 			}
 		}
 	}
@@ -99,7 +99,7 @@ void MapGen::placeRooms(char** map) {
 		if (random() > 0.5) {
 			int j = sx;
 			while (j != ex) {
-				(*map)[j + sy * MAP_WIDTH] = terrain_t::EMPTY;
+				(*map)[j + sy * MAP_WIDTH] = random() > MUDCOEFF ? terrain_t::EMPTY : terrain_t::MUD;
 				j += (ex - sx) / abs(ex - sx);
 				if (random() > 0.9) {
 					recurseHallways(map, j, sy, (random() > 0.5 ? 0 : 2), 0);
@@ -107,7 +107,7 @@ void MapGen::placeRooms(char** map) {
 			}
 			j = sy;
 			while (j != ey) {
-				(*map)[ex + j * MAP_WIDTH] = terrain_t::EMPTY;
+				(*map)[ex + j * MAP_WIDTH] = random() > MUDCOEFF ? terrain_t::EMPTY : terrain_t::MUD;
 				j += (ey - sy) / abs(ey - sy);
 				if (random() > 0.9) {
 					recurseHallways(map, ex, j, (random() > 0.5 ? 1 : 3), 0);
@@ -117,7 +117,7 @@ void MapGen::placeRooms(char** map) {
 		else {
 			int j = sy;
 			while (j != ey) {
-				(*map)[sx + j * MAP_WIDTH] = terrain_t::EMPTY;
+				(*map)[sx + j * MAP_WIDTH] = random() > MUDCOEFF ? terrain_t::EMPTY : terrain_t::MUD;
 				j += (ey - sy) / abs(ey - sy);
 				if (random() > 0.9) {
 					recurseHallways(map, sx, j, (random() > 0.5 ? 1 : 3), 0);
@@ -125,7 +125,7 @@ void MapGen::placeRooms(char** map) {
 			}
 			j = sx;
 			while (j != ex) {
-				(*map)[j + ey * MAP_WIDTH] = terrain_t::EMPTY;
+				(*map)[j + ey * MAP_WIDTH] = random() > MUDCOEFF ? terrain_t::EMPTY : terrain_t::MUD;
 				j += (ex - sx) / abs(ex - sx);
 				if (random() > 0.9) {
 					recurseHallways(map, j, ey, (random() > 0.5 ? 0 : 2), 0);

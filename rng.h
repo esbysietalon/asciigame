@@ -4,4 +4,4 @@
 
 extern std::mt19937 rng;
 
-void initRNG();
+void initRNG(long seed=time(NULL));

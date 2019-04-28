@@ -9,6 +9,8 @@ public:
 	~Atlas();
 
 	char getAt(int x, int y);
+	void terraform(int x, int y, terrain_t tile);
+	float getCostAt(int x, int y);
 	void create(int w, int h);
 	int turnTo(int num);
 private:

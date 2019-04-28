@@ -59,11 +59,30 @@ void Overseer::init()
 
 	consoleBuffer = new CHAR_INFO[(MAP_WIDTH) * (MAP_HEIGHT)];
 	
+	std::string seeder = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+	std::cout << "Hello. Please enter desired seed:" << std::endl;
+	std::string seed = "";
+	std::cin >> seed;
 
-	initRNG();
+	long seedVal = 0;
+	
+	for (int i = 0; i < seed.length(); i++) {
+		int s = seeder.find(seed.at(i));
+		if (s == -1) {
+			s = 0;
+		}
+		seedVal += s * (i + 1);
+	}
+	if (seedVal == 0) {
+		initRNG();
+	}
+	else {
+		initRNG(seedVal);
+	}
 	world = new Atlas();
 	actors = new std::vector<Actor*>();
+	honeys = new std::vector<intpair_t>();
 	world->create(MAP_WIDTH, MAP_HEIGHT);
 	populate();
 	if(actors->size() > 0)
@@ -76,7 +95,7 @@ void Overseer::init()
 
 bool Overseer::isOccupied(int x, int y, int actor){
 	int index = x + y * MAP_WIDTH;
-	if(world->getAt(x, y) != terrain_t::EMPTY){
+	if(world->getCostAt(x, y) == INFINITY){
 		return true;
 	}
 	for(int i = 0; i < actors->size(); i++){
@@ -351,7 +370,7 @@ bool Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 	
 	//std::queue<intpair_t> points;
 
-	auto cmp = [](intpair_t a, intpair_t b) { return a.cost < b.cost; };
+	auto cmp = [](intpair_t a, intpair_t b) { return a.cost > b.cost; };
 	std::priority_queue < intpair_t, std::vector<intpair_t>, decltype(cmp)> points(cmp);
 	
 	bool reachable = false;
@@ -362,7 +381,7 @@ bool Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 		
 		int x = points.top().x;
 		int y = points.top().y;
-		if (checkMap[x + y * MAP_WIDTH] || floodMap[x + y * MAP_WIDTH].x != -1) {
+		if (checkMap[x + y * MAP_WIDTH]) {
 			//std::string reportstr = "\nUH OH\n";
 			//report(reportstr.data(), reportstr.length());
 			points.pop();
@@ -398,103 +417,25 @@ bool Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 		for (int ix = -1; ix <= 1; ix++) {
 			for (int iy = -1; iy <= 1; iy++) {
 				bool pass = false;
-				if (ix == 0 && iy == 0)
+				if (ix == 0 && iy == 0) {
 					pass = true;
-				if ((x + ix) < 0 || (x + ix) >= MAP_WIDTH || (y + iy) < 0 || (y + iy) >= MAP_HEIGHT)
+				}
+				if ((x + ix) < 0 || (x + ix) >= MAP_WIDTH || (y + iy) < 0 || (y + iy) >= MAP_HEIGHT) {
 					pass = true;
+				}
 				if (checkMap[(x + ix) + (y + iy)*MAP_WIDTH]) {
-					std::string reportstr = "\nTRIGGERED\n";
-					report(reportstr.data(), reportstr.length());
 					pass = true;
 				}
 				if (isOccupied(x+ix,y+iy,index))
 					pass = true;
 				if (!pass) {
 					intpair_t thispoint(x + ix, y + iy);
-					/*switch (ix) {
-					case -1:
-						switch (iy) {
-						case -1:
-							thispoint.move = 'q';
-							if (x == sx && y == sy)
-								thispoint.origin = 'q';
-							else
-								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-							break;
-						case 0:
-							thispoint.move = 'a';
-							if (x == sx && y == sy)
-								thispoint.origin = 'a';
-							else
-								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-							break;
-						case 1:
-							thispoint.move = 'z';
-							if (x == sx && y == sy)
-								thispoint.origin = 'z';
-							else
-								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-							break;
-						}
-						break;
-					case 0:
-						switch (iy) {
-						case -1:
-							thispoint.move = 'w';
-							if (x == sx && y == sy)
-								thispoint.origin = 'w';
-							else
-								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-							break;
-						case 0:
-							break;
-						case 1:
-							thispoint.move = 's';
-							if (x == sx && y == sy)
-								thispoint.origin = 's';
-							else
-								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-							break;
-						}
-						break;
-					case 1:
-						switch (iy) {
-						case -1:
-							thispoint.move = 'e';
-							if (x == sx && y == sy)
-								thispoint.origin = 'e';
-							else
-								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-							break;
-						case 0:
-							thispoint.move = 'd';
-							if (x == sx && y == sy)
-								thispoint.origin = 'd';
-							else
-								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-							break;
-						case 1:
-							thispoint.move = 'c';
-							if (x == sx && y == sy)
-								thispoint.origin = 'c';
-							else
-								thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
-
-							break;
-						}
-						break;
-					}*/
 					thispoint.px = x;
 					thispoint.py = y;
 					int mcost = 1;
 					if (abs(ix) + abs(iy) > 1)
 						mcost = 1.5;
+					mcost *= world->getCostAt(x + ix, y + iy);
 					int ecost = abs(ex - thispoint.x) + abs(ey - thispoint.y);
 					thispoint.scost = floodMap[x + y * MAP_WIDTH].scost + mcost;
 					thispoint.cost =  ecost + thispoint.scost;
@@ -596,20 +537,27 @@ void Overseer::think(int i, std::string* str_tell) {
 	std::uniform_int_distribution<> smallh(ay - 10, ay + 10);
 	int ex = 0, ey = 0;
 	if (actor->getAIState() == aistate_t::READY) {
-		ex = randw(rng);
-		ey = randh(rng);
-		while (isOccupied(ex, ey)) {
+		
+		if (honeys->size() > 0) {
+			std::shuffle(honeys->begin(), honeys->end(), rng);
+			ex = honeys->front().x;
+			ey = honeys->front().y;
+		}
+		else {
 			ex = randw(rng);
 			ey = randh(rng);
+			while (isOccupied(ex, ey)) {
+				ex = randw(rng);
+				ey = randh(rng);
+			}
 		}
-	
 		if (dijkstraesque(i, ex, ey, ax, ay)) {
-			std::string str_report;
+			/*std::string str_report;
 			for (int ii = 0; ii < paths.at(i).size(); ii++) {
 				str_report += paths.at(i).at(ii);
 			}
 			str_report += '\n';
-			//report(str_report.data(), str_report.length());
+			report(str_report.data(), str_report.length());*/
 			actor->setAIState(aistate_t::SEARCHING);
 		}
 	}
@@ -631,6 +579,9 @@ void Overseer::update() {
 	
 	tell(str_tell.data(), str_tell.length());
 	for (int i = 0; i < actors->size(); i++) {
+		if (world->getAt(actors->at(i)->getX(), actors->at(i)->getY()) != terrain_t::HONEY) {
+			world->terraform(actors->at(i)->getX(), actors->at(i)->getY(), terrain_t::EMPTY);
+		}
 		if (actors->at(i)->getAIState()) {
 			think(i, &str_tell);
 			if (paths.at(i).size() > 0) {
@@ -666,6 +617,17 @@ void Overseer::populate(){
 			y = randh(rng);
 		}
 		enterActor(new Actor(x, y));
+	}
+	for (int i = 0; i < HONEY_NUM; i++) {
+		int x = randw(rng);
+		int y = randh(rng);
+
+		while (isOccupied(x, y)) {
+			x = randw(rng);
+			y = randh(rng);
+		}
+		world->terraform(x, y, terrain_t::HONEY);
+		honeys->push_back(intpair_t(x, y));
 	}
 }
 
