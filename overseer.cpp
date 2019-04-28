@@ -489,7 +489,7 @@ void Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 					}*/
 					thispoint.px = x;
 					thispoint.py = y;
-					thispoint.cost = (ex - x) * (ex - x) + (ey - y) * (ey - y);
+					thispoint.cost = (ex - thispoint.x) * (ex - thispoint.x) + (ey - thispoint.y) * (ey - thispoint.y) + (sx - thispoint.x) * (sx - thispoint.x) + (sy - thispoint.y) * (sy - thispoint.y);
 					points.push(thispoint);
 				}
 			}

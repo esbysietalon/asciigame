@@ -4,7 +4,7 @@
 #define WINDOW_HEIGHT 900
 #define MAP_HEIGHT 100
 #define MAP_WIDTH 100
-#define ACTOR_NUM 2
+#define ACTOR_NUM 5
 #define HALLSNUM 15
 #define ROOMSNUM 10
 #define MINROOMLEN 3
