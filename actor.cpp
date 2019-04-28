@@ -5,18 +5,23 @@ Actor::Actor(int t, int tt)
 {
 	x = t;
 	y = tt;
-	ai = true;
+	ai = aistate_t::READY;
 	label = 'X';//0xDB;
 }
 
 void Actor::assume()
 {
-	ai = false;
+	ai = aistate_t::PLAYER;
 }
 
-bool Actor::getAIState()
+char Actor::getAIState()
 {
 	return ai;
+}
+
+void Actor::setAIState(char state)
+{
+	ai = state;
 }
 
 int Actor::getX()
@@ -46,4 +51,14 @@ char Actor::getLabel()
 int Actor::getIndex()
 {
 	return x + y * MAP_WIDTH;
+}
+
+void Actor::setPath(char ** newPath)
+{
+	path = newPath;
+}
+
+char ** Actor::getPath()
+{
+	return path;
 }

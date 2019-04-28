@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "overseer.h"
 #include "rng.h"
-
+#include <queue>
 
 
 bool actor_pos_sort(Actor* a, Actor* o) {
@@ -139,6 +139,415 @@ void Overseer::tell(const char* message, int msglen) {
 	}
 }
 
+void Overseer::parseInput(int i, std::string* str_tell) {
+	switch (input) {
+	case 'q':
+	case 'Q':
+		if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() - 1, i)) {
+			actors->at(i)->setX(actors->at(i)->getX() - 1);
+			actors->at(i)->setY(actors->at(i)->getY() - 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northwest.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move northwest, but was blocked.\n";
+		}
+
+		break;
+	case 'w':
+	case 'W':
+		if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() - 1, i)) {
+			actors->at(i)->setY(actors->at(i)->getY() - 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves north.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move north, but was blocked.\n";
+		}
+		break;
+	case 'e':
+	case 'E':
+		if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() - 1, i)) {
+			actors->at(i)->setX(actors->at(i)->getX() + 1);
+			actors->at(i)->setY(actors->at(i)->getY() - 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northeast.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move northeast, but was blocked.\n";
+		}
+		break;
+	case 'a':
+	case 'A':
+		if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY(), i)) {
+			actors->at(i)->setX(actors->at(i)->getX() - 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves west.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move west, but was blocked.\n";
+		}
+		break;
+	case 's':
+	case 'S':
+		if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() + 1, i)) {
+			actors->at(i)->setY(actors->at(i)->getY() + 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves south.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move south, but was blocked.\n";
+		}
+		break;
+	case 'd':
+	case 'D':
+		if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY(), i)) {
+			actors->at(i)->setX(actors->at(i)->getX() + 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves east.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move east, but was blocked.\n";
+		}
+		break;
+	case 'z':
+	case 'Z':
+		if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() + 1, i)) {
+			actors->at(i)->setX(actors->at(i)->getX() - 1);
+			actors->at(i)->setY(actors->at(i)->getY() + 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southwest.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move southwest, but was blocked.\n";
+		}
+		break;
+	case 'c':
+	case 'C':
+		if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() + 1, i)) {
+			actors->at(i)->setX(actors->at(i)->getX() + 1);
+			actors->at(i)->setY(actors->at(i)->getY() + 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southeast.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move southeast, but was blocked.\n";
+		}
+		break;
+	default:
+		*str_tell = prefix_s + "Actor " + std::to_string(i) + " sits around and does nothing.\n";
+	}
+}
+
+void Overseer::parseInput(int i, std::string* str_tell, char in) {
+	switch (in) {
+	case 'q':
+	case 'Q':
+		if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() - 1, i)) {
+			actors->at(i)->setX(actors->at(i)->getX() - 1);
+			actors->at(i)->setY(actors->at(i)->getY() - 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northwest.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move northwest, but was blocked.\n";
+		}
+
+		break;
+	case 'w':
+	case 'W':
+		if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() - 1, i)) {
+			actors->at(i)->setY(actors->at(i)->getY() - 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves north.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move north, but was blocked.\n";
+		}
+		break;
+	case 'e':
+	case 'E':
+		if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() - 1, i)) {
+			actors->at(i)->setX(actors->at(i)->getX() + 1);
+			actors->at(i)->setY(actors->at(i)->getY() - 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northeast.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move northeast, but was blocked.\n";
+		}
+		break;
+	case 'a':
+	case 'A':
+		if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY(), i)) {
+			actors->at(i)->setX(actors->at(i)->getX() - 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves west.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move west, but was blocked.\n";
+		}
+		break;
+	case 's':
+	case 'S':
+		if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() + 1, i)) {
+			actors->at(i)->setY(actors->at(i)->getY() + 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves south.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move south, but was blocked.\n";
+		}
+		break;
+	case 'd':
+	case 'D':
+		if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY(), i)) {
+			actors->at(i)->setX(actors->at(i)->getX() + 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves east.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move east, but was blocked.\n";
+		}
+		break;
+	case 'z':
+	case 'Z':
+		if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() + 1, i)) {
+			actors->at(i)->setX(actors->at(i)->getX() - 1);
+			actors->at(i)->setY(actors->at(i)->getY() + 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southwest.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move southwest, but was blocked.\n";
+		}
+		break;
+	case 'c':
+	case 'C':
+		if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() + 1, i)) {
+			actors->at(i)->setX(actors->at(i)->getX() + 1);
+			actors->at(i)->setY(actors->at(i)->getY() + 1);
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southeast.\n";
+		}
+		else {
+			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move southeast, but was blocked.\n";
+		}
+		break;
+	default:
+		*str_tell = prefix_s + "Actor " + std::to_string(i) + " sits around and does nothing.\n";
+	}
+}
+
+void add_to_path(char** path, int* len, int* size, char item) {
+	std::cout << *len << " " << *size << std::endl;
+	if (*len + 1 >= *size) {
+		*size *= 2;
+		*path = (char *) realloc(*path, (*size) * sizeof(char));
+	}
+	(*path)[*len] = item;
+	(*len)++;
+}
+void Overseer::dijkstraesque(int sx, int sy, int ex, int ey) {
+	path.clear();
+	intpair_t currpoint(sx, sy);
+	intpair_t endpoint(ex, ey);
+	intpair_t* floodMap = new intpair_t[MAP_WIDTH*MAP_HEIGHT];
+	bool* checkMap = new bool[MAP_WIDTH*MAP_HEIGHT];
+	for (int i = 0; i < MAP_WIDTH*MAP_HEIGHT; i++) {
+		floodMap[i] = intpair_t(-1, -1);
+		checkMap[i] = false;
+	}
+	
+	std::queue<intpair_t> points;
+	std::queue<char> movechain;
+	points.push(currpoint);
+	while (points.size() > 0) {
+		int x = points.front().x;
+		int y = points.front().y;
+		if (checkMap[x + y * MAP_WIDTH]) {
+			points.pop();
+			continue;
+		}
+		//printf("x: %d y: %d\n", x, y);
+		std::string reportstr = "x: " + std::to_string(x) + " y: " + std::to_string(y) + '\n';
+		report(reportstr.data(), reportstr.length());
+		checkMap[x + y * MAP_WIDTH] = true;
+		floodMap[x + y * MAP_WIDTH] = points.front();
+		
+		/*for (int yy = 0; yy < MAP_HEIGHT; yy++) {
+			for (int xx = 0; xx < MAP_WIDTH; xx++) {
+				std::cout << floodMap[xx + yy * MAP_WIDTH].move << ' ';
+			}
+			std::cout << std::endl;
+		}*/
+		if (x == ex && y == ey) {
+			floodMap[sx + sy * MAP_WIDTH].move = points.front().origin;
+			break;
+		}
+		points.pop();
+		for (int ix = -1; ix <= 1; ix++) {
+			for (int iy = -1; iy <= 1; iy++) {
+				if (ix == 0 && iy == 0)
+					continue;
+				if ((x + ix) < 0 || (x + ix) >= MAP_WIDTH || (y + iy) < 0 || (y + iy) >= MAP_HEIGHT)
+					continue;
+				if (checkMap[(x + ix) + (y + iy)*MAP_WIDTH])
+					continue;
+				if (world->getAt(x + ix, y + iy) != terrain_t::EMPTY)
+					continue;
+				intpair_t thispoint(x + ix, y + iy);
+				switch (ix) {
+				case -1:
+					switch (iy) {
+					case -1:
+						thispoint.move = 'q';
+						if (x == sx && y == sy)
+							thispoint.origin = 'q';
+						else
+							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+						break;
+					case 0:
+						thispoint.move = 'a';
+						if (x == sx && y == sy)
+							thispoint.origin = 'a';
+						else
+							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+						break;
+					case 1:
+						thispoint.move = 'z';
+						if (x == sx && y == sy)
+							thispoint.origin = 'z';
+						else
+							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+						break;
+					}
+					break;
+				case 0:
+					switch (iy) {
+					case -1:
+						thispoint.move = 'w';
+						if (x == sx && y == sy)
+							thispoint.origin = 'w';
+						else
+							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+						break;
+					case 0:
+						break;
+					case 1:
+						thispoint.move = 's';
+						if (x == sx && y == sy)
+							thispoint.origin = 's';
+						else
+							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+						break;
+					}
+					break;
+				case 1:
+					switch (iy) {
+					case -1:
+						thispoint.move = 'e';
+						if (x == sx && y == sy)
+							thispoint.origin = 'e';
+						else
+							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+						break;
+					case 0:
+						thispoint.move = 'd';
+						if (x == sx && y == sy)
+							thispoint.origin = 'd';
+						else
+							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+						break;
+					case 1:
+						thispoint.move = 'c';
+						if (x == sx && y == sy)
+							thispoint.origin = 'c';
+						else
+							thispoint.origin = floodMap[x + y * MAP_WIDTH].origin;
+
+						break;
+					}
+					break;
+				}
+				thispoint.parent = x + y * MAP_WIDTH;
+				points.push(thispoint);
+			}
+		}
+	}
+	int cx = sx;
+	int cy = sy;
+	bool emergencybrake = false;
+	while (cx != ex && cy != ey) {
+		//std::cout << "cx: " << cx << " cy: " << cy << std::endl;
+		path.push_back(floodMap[cx + cy * MAP_WIDTH].move);
+		std::string str = floodMap[cx + cy * MAP_WIDTH].move+"";
+		//report(str.data(), str.length());
+		switch (floodMap[cx + cy * MAP_WIDTH].move) {
+		case 'q':
+			cx--;
+			cy--;
+			break;
+		case 'w':
+			cy--;
+			break;
+		case 'e':
+			cx++;
+			cy--;
+			break;
+		case 'a':
+			cx--;
+			break;
+		case 's':
+			cy++;
+			break;
+		case 'd':
+			cx++;
+			break;
+		case 'z':
+			cx--;
+			cy++;
+			break;
+		case 'c':
+			cx++;
+			cy++;
+			break;
+		default:
+			emergencybrake = true;
+		}
+		if (emergencybrake)
+			break;
+	}
+}
+void Overseer::think(int i, std::string* str_tell) {
+	Actor* actor = actors->at(i);
+	
+	int ax = actor->getX();
+	int ay = actor->getY();
+	
+
+	std::uniform_int_distribution<> randw(0, MAP_WIDTH);
+	std::uniform_int_distribution<> randh(0, MAP_HEIGHT);
+	std::uniform_int_distribution<> smallw(ax - 10, ax + 10);
+	std::uniform_int_distribution<> smallh(ay - 10, ay + 10);
+	
+	if (actor->getAIState() == aistate_t::READY) {
+		int ex = randw(rng), ey = randh(rng);
+		while (isOccupied(ex, ey)) {
+			ex = randw(rng);
+			ey = randh(rng);
+		}
+		dijkstraesque(ax, ay, ex, ey);
+		std::string str_report;
+		for (int i = 0; i < path.size(); i++) {
+			str_report += path.at(i);
+		}
+		str_report += '\n';
+		//report(str_report.data(), str_report.length());
+		actor->setAIState(aistate_t::SEARCHING);
+	}
+	switch(actor->getAIState){
+	case aistate_t::READY:
+		*str_tell = prefix_s + "Actor " + std::to_string(i) + " sits around and does nothing.\n";
+		break;
+	case aistate_t::SEARCHING:
+		*str_tell = prefix_s + "Actor " + std::to_string(i) + " is searching.\n";
+		break;
+	}
+	
+
+}
+
 void Overseer::update() {
 	std::string str_report = "update\n";
 	std::string str_tell = legend;
@@ -146,104 +555,24 @@ void Overseer::update() {
 	tell(str_tell.data(), str_tell.length());
 	for (int i = 0; i < actors->size(); i++) {
 		if (actors->at(i)->getAIState()) {
-			str_tell = prefix_s + "Actor " + std::to_string(i) + " sits around and does nothing.\n";
-			
-		}
-		else {
-			switch (input) {
-			case 'q':
-			case 'Q':
-				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() - 1, i)) {
-					actors->at(i)->setX(actors->at(i)->getX() - 1);
-					actors->at(i)->setY(actors->at(i)->getY() - 1);
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northwest.\n";
-				}
-				else {
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move northwest, but was blocked.\n";
-				}
+			think(i, &str_tell);
+			if (path.size() > 0) {
+				parseInput(i, &str_tell, path.front());
+				path.erase(path.begin());
 				
-				break;
-			case 'w':
-			case 'W':
-				if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() - 1, i)) {
-					actors->at(i)->setY(actors->at(i)->getY() - 1);
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves north.\n";
-				}
-				else {
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move north, but was blocked.\n";
-				}
-				break;
-			case 'e':
-			case 'E':
-				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() - 1, i)) {
-					actors->at(i)->setX(actors->at(i)->getX() + 1);
-					actors->at(i)->setY(actors->at(i)->getY() - 1);
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northeast.\n";
-				}
-				else {
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move northeast, but was blocked.\n";
-				}
-				break;
-			case 'a':
-			case 'A':
-				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY(), i)) {
-					actors->at(i)->setX(actors->at(i)->getX() - 1);
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves west.\n";
-				}
-				else {
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move west, but was blocked.\n";
-				}
-				break;
-			case 's':
-			case 'S':
-				if (!isOccupied(actors->at(i)->getX(), actors->at(i)->getY() + 1, i)) {
-					actors->at(i)->setY(actors->at(i)->getY() + 1);
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves south.\n";
-				}
-				else {
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move south, but was blocked.\n";
-				}
-				break;
-			case 'd':
-			case 'D':
-				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY(), i)) {
-					actors->at(i)->setX(actors->at(i)->getX() + 1);
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves east.\n";
-				}
-				else {
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move east, but was blocked.\n";
-				}
-				break;
-			case 'z':
-			case 'Z':
-				if (!isOccupied(actors->at(i)->getX() - 1, actors->at(i)->getY() + 1, i)) {
-					actors->at(i)->setX(actors->at(i)->getX() - 1);
-					actors->at(i)->setY(actors->at(i)->getY() + 1);
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southwest.\n";
-				}
-				else {
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move southwest, but was blocked.\n";
-				}
-				break;
-			case 'c':
-			case 'C':
-				if (!isOccupied(actors->at(i)->getX() + 1, actors->at(i)->getY() + 1, i)) {
-					actors->at(i)->setX(actors->at(i)->getX() + 1);
-					actors->at(i)->setY(actors->at(i)->getY() + 1);
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southeast.\n";
-				}
-				else {
-					str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move southeast, but was blocked.\n";
-				}
-				break;
-			default:
-				str_tell = prefix_s + "Actor " + std::to_string(i) + " sits around and does nothing.\n";
 			}
+			if (path.size() == 0) {
+				actors->at(i)->setAIState(aistate_t::READY);
+			}
+		}	
+		else {
+			parseInput(i, &str_tell);
 		}
 		tell(str_tell.data(), str_tell.length());
+		print();
 	}
-	str_report = "actors size is " + std::to_string(actors->size()) + "\n";
-	report(str_report.data(), str_report.length());
+	//str_report = "actors size is " + std::to_string(actors->size()) + "\n";
+	//report(str_report.data(), str_report.length());
 }
 
 void Overseer::populate(){
@@ -258,39 +587,8 @@ void Overseer::populate(){
 			y = randh(rng);
 		}
 		enterActor(new Actor(x, y));
-
 	}
 }
-
-
-/*void Overseer::print() {
-	system("CLS");
-	if(actors->size() > 0)
-		std::sort(actors->begin(), actors->end(), actor_pos_sort);
-	
-	int front = 0;
-	for (int y = 0; y < MAP_HEIGHT; y++) {
-		for (int x = 0; x < MAP_WIDTH; x++) {
-			int index = x + y * MAP_WIDTH;
-			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), DEFAULTCOLOR);
-			if(front < actors->size() && index == actors->at(front)->getX() + actors->at(front)->getY() * MAP_WIDTH){
-				if (actors->at(front)->getAIState()) {
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), AICOLOR);
-				}
-				else {
-					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), PLAYERCOLOR);
-				}
-				std::cout << actors->at(front)->getLabel();
-				
-				front++;
-			}else{
-				std::cout << world->getAt(x, y);
-			}
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-}*/
 
 DWORD Overseer::getInput(INPUT_RECORD **eventBuffer)
 {
@@ -321,20 +619,13 @@ DWORD Overseer::getInput(INPUT_RECORD **eventBuffer)
 }
 
 void Overseer::print() {
-	//system("CLS");
-	/* Write our character buffer (a single character currently) to the console buffer */
 	for (int i = 0; i < (MAP_WIDTH) * (MAP_HEIGHT); i++) {
 		CHAR_INFO cinfo;
 		cinfo.Char.AsciiChar = ' ';
 		cinfo.Attributes = DEFAULTCOLOR;
 		consoleBuffer[i] = cinfo;
 	}
-	/*for (int i = 0; i < strlen(legend); i++) {
-		CHAR_INFO cinfo;
-		cinfo.Char.AsciiChar = legend[i];
-		cinfo.Attributes = DEFAULTCOLOR;
-		consoleBuffer[i] = cinfo;
-	}*/
+	
 	for (int y = 0; y < MAP_HEIGHT; y++) {
 		for (int x = 0; x < MAP_WIDTH; x++) {
 			CHAR_INFO cinfo;
@@ -363,8 +654,7 @@ void Overseer::run() {
 	//std::string unparsed;
 	while (running) {
 		update();
-		print();
-		//std::cin >> unparsed;
+		//print();
 		while (running) {
 			input = -1;
 			DWORD eventsRead = getInput(&eventBuffer);

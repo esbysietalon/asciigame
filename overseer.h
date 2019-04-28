@@ -8,6 +8,27 @@
 #include <windows.h>
 #include <string>
 
+
+struct intpair_t {
+	int x, y;
+	char move;
+	char origin;
+	int parent;
+	intpair_t(int i, int j) {
+		x = i;
+		y = j;
+		move = ' ';
+		origin = ' ';
+		parent = -1;
+	}
+	intpair_t() {
+		x = -1;
+		y = -1;
+		move = ' ';
+		origin = ' ';
+		parent = -1;
+	}
+};
 class Atlas;
 class Overseer {
 public:
@@ -25,6 +46,11 @@ private:
 	void enterActor(Actor* actor);
 	void populate();
 	void update();
+	void parseInput(int index, std::string* std_tell);
+	void parseInput(int index, std::string* std_tell, char in);
+	void think(int index, std::string* std_tell);
+	
+	void dijkstraesque(int sx, int sy, int ex, int ey);
 
 	DWORD getInput(INPUT_RECORD** eventBuffer);
 
@@ -52,6 +78,7 @@ private:
 	DWORD dwWritten_s;
 
 	char* legend = "Press x to exit. Press 'qweasdzc' to navigate.\n";
+	std::vector<char> path;
 
 	char input;
 

@@ -4,7 +4,7 @@
 #define WINDOW_HEIGHT 900
 #define MAP_HEIGHT 100
 #define MAP_WIDTH 100
-#define ACTOR_NUM 10
+#define ACTOR_NUM 2
 #define HALLSNUM 15
 #define ROOMSNUM 10
 #define MINROOMLEN 3
@@ -15,3 +15,4 @@
 #define DEFAULTCOLOR BGCOLOR | FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN
 enum terrain_t {EMPTY=' ', WALL='#'/*0xB1*/};
 enum map_t {RANDOM, HALLWAYS, ROOMS};
+enum aistate_t { PLAYER, READY, SEARCHING };
