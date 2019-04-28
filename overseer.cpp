@@ -69,15 +69,17 @@ void Overseer::init()
 	
 	for (int i = 0; i < seed.length(); i++) {
 		int s = seeder.find(seed.at(i));
-		if (s == -1) {
+		if (s <= -1) {
 			s = 0;
 		}
 		seedVal += s * (i + 1);
 	}
-	if (seedVal == 0) {
+	std::cout << "using seedVal " << seedVal << std::endl;
+	if (seedVal <= 0) {
 		initRNG();
 	}
 	else {
+	
 		initRNG(seedVal);
 	}
 	world = new Atlas();
@@ -172,6 +174,7 @@ void Overseer::parseInput(int i, std::string* str_tell) {
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northwest.\n";
 		}
 		else {
+			dijkstraesque(i, actors->at(i)->getGoalX(), actors->at(i)->getGoalY(), actors->at(i)->getX(), actors->at(i)->getY());
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move northwest, but was blocked.\n";
 		}
 
@@ -183,6 +186,7 @@ void Overseer::parseInput(int i, std::string* str_tell) {
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves north.\n";
 		}
 		else {
+			dijkstraesque(i, actors->at(i)->getGoalX(), actors->at(i)->getGoalY(), actors->at(i)->getX(), actors->at(i)->getY());
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move north, but was blocked.\n";
 		}
 		break;
@@ -194,6 +198,7 @@ void Overseer::parseInput(int i, std::string* str_tell) {
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves northeast.\n";
 		}
 		else {
+			dijkstraesque(i, actors->at(i)->getGoalX(), actors->at(i)->getGoalY(), actors->at(i)->getX(), actors->at(i)->getY());
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move northeast, but was blocked.\n";
 		}
 		break;
@@ -204,6 +209,7 @@ void Overseer::parseInput(int i, std::string* str_tell) {
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves west.\n";
 		}
 		else {
+			dijkstraesque(i, actors->at(i)->getGoalX(), actors->at(i)->getGoalY(), actors->at(i)->getX(), actors->at(i)->getY());
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move west, but was blocked.\n";
 		}
 		break;
@@ -214,6 +220,7 @@ void Overseer::parseInput(int i, std::string* str_tell) {
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves south.\n";
 		}
 		else {
+			dijkstraesque(i, actors->at(i)->getGoalX(), actors->at(i)->getGoalY(), actors->at(i)->getX(), actors->at(i)->getY());
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move south, but was blocked.\n";
 		}
 		break;
@@ -224,6 +231,7 @@ void Overseer::parseInput(int i, std::string* str_tell) {
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves east.\n";
 		}
 		else {
+			dijkstraesque(i, actors->at(i)->getGoalX(), actors->at(i)->getGoalY(), actors->at(i)->getX(), actors->at(i)->getY());
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move east, but was blocked.\n";
 		}
 		break;
@@ -235,6 +243,7 @@ void Overseer::parseInput(int i, std::string* str_tell) {
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southwest.\n";
 		}
 		else {
+			dijkstraesque(i, actors->at(i)->getGoalX(), actors->at(i)->getGoalY(), actors->at(i)->getX(), actors->at(i)->getY());
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move southwest, but was blocked.\n";
 		}
 		break;
@@ -246,6 +255,7 @@ void Overseer::parseInput(int i, std::string* str_tell) {
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " moves southeast.\n";
 		}
 		else {
+			dijkstraesque(i, actors->at(i)->getGoalX(), actors->at(i)->getGoalY(), actors->at(i)->getX(), actors->at(i)->getY());
 			*str_tell = prefix_s + "Actor " + std::to_string(i) + " attempted to move southeast, but was blocked.\n";
 		}
 		break;
@@ -359,8 +369,11 @@ bool Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 	//std::cout << paths.size() << " out of " << (index) << std::endl;
 	paths.at(index).clear();
 	
+	actors->at(index)->setGoal(sx, sy);
+
 	intpair_t currpoint(sx, sy);
 	intpair_t endpoint(ex, ey);
+	
 	intpair_t* floodMap = new intpair_t[MAP_WIDTH*MAP_HEIGHT];
 	bool* checkMap = new bool[MAP_WIDTH*MAP_HEIGHT];
 	for (int i = 0; i < MAP_WIDTH*MAP_HEIGHT; i++) {
@@ -452,6 +465,9 @@ bool Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 	bool emergencybrake = false;
 	reportstr = "";
 	while (reachable) {
+		if (cx == sx && cy == sy) {
+			break;
+		}
 		//std::cout << "(" << cx << ", " << cy << ") "; //<< sx << " " << sy << " " << ex << " " << ey << std::endl;
 		//reportstr = "<" + std::to_string(cx) + "|" + std::to_string(cy) + ">" + reportstr;
 		reportstr += "<" + std::to_string(cx) + "|" + std::to_string(cy) + ">";
@@ -509,9 +525,7 @@ bool Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 			break;
 		}
 		paths.at(index).push_back(move);
-		if (cx == sx && cy == sy) {
-			break;
-		}
+		
 		cx = nx;
 		cy = ny;
 	}
@@ -672,6 +686,9 @@ void Overseer::print() {
 			CHAR_INFO cinfo;
 			cinfo.Char.AsciiChar = world->getAt(x, y);//(unsigned char)219;
 			cinfo.Attributes = DEFAULTCOLOR;//rand() % 256;
+			if (world->getAt(x, y) == terrain_t::HONEY) {
+				cinfo.Attributes = HONEYCOLOR;
+			}
 			consoleBuffer[x + (MAP_WIDTH) * y] = cinfo;
 		}
 	}

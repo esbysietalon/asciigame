@@ -5,6 +5,8 @@ Actor::Actor(int t, int tt)
 {
 	x = t;
 	y = tt;
+	goal_x = t;
+	goal_y = tt;
 	ai = aistate_t::READY;
 	label = 'X';//0xDB;
 }
@@ -33,6 +35,14 @@ int Actor::getY()
 	return y;
 }
 
+int Actor::getGoalX()
+{
+	return goal_x;
+}
+int Actor::getGoalY()
+{
+	return goal_y;
+}
 void Actor::setX(int num)
 {
 	x = num;
@@ -41,6 +51,12 @@ void Actor::setX(int num)
 void Actor::setY(int num)
 {
 	y = num;
+}
+
+void Actor::setGoal(int x, int y)
+{
+	goal_x = x;
+	goal_y = y;
 }
 
 char Actor::getLabel()
