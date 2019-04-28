@@ -13,20 +13,25 @@ struct intpair_t {
 	int x, y;
 	char move;
 	char origin;
-	int parent;
+	int px, py;
+	float cost;
 	intpair_t(int i, int j) {
 		x = i;
 		y = j;
 		move = ' ';
 		origin = ' ';
-		parent = -1;
+		px = -1;
+		py = -1;
+		cost = 1;
 	}
 	intpair_t() {
 		x = -1;
 		y = -1;
 		move = ' ';
 		origin = ' ';
-		parent = -1;
+		px = -1;
+		py = -1;
+		cost = 1;
 	}
 };
 class Atlas;

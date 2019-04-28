@@ -349,47 +349,66 @@ void Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 		checkMap[i] = false;
 	}
 	
-	std::queue<intpair_t> points;
+	//std::queue<intpair_t> points;
+
+	auto cmp = [](intpair_t a, intpair_t b) { return a.cost < b.cost; };
+	std::priority_queue < intpair_t, std::vector<intpair_t>, decltype(cmp)> points(cmp);
+	
 	std::queue<char> movechain;
 	points.push(currpoint);
 	while (points.size() > 0) {
-		int x = points.front().x;
-		int y = points.front().y;
-		if (checkMap[x + y * MAP_WIDTH]) {
+		
+		int x = points.top().x;
+		int y = points.top().y;
+		if (checkMap[x + y * MAP_WIDTH] || floodMap[x + y * MAP_WIDTH].x != -1) {
+			//std::string reportstr = "\nUH OH\n";
+			//report(reportstr.data(), reportstr.length());
 			points.pop();
 			continue;
 		}
 		//printf("x: %d y: %d\n", x, y);
-		std::string reportstr = "x: " + std::to_string(x) + " y: " + std::to_string(y) + '\n';
-		report(reportstr.data(), reportstr.length());
+		//std::string reportstr = "x: " + std::to_string(x) + " y: " + std::to_string(y) + '\n';
+		//report(reportstr.data(), reportstr.length());
 		checkMap[x + y * MAP_WIDTH] = true;
-		floodMap[x + y * MAP_WIDTH] = points.front();
-		
-		/*for (int yy = 0; yy < MAP_HEIGHT; yy++) {
+		floodMap[x + y * MAP_WIDTH] = points.top();
+		/*
+		for (int yy = 0; yy < MAP_HEIGHT; yy++) {
 			for (int xx = 0; xx < MAP_WIDTH; xx++) {
-				std::cout << floodMap[xx + yy * MAP_WIDTH].move << ' ';
+				if (!checkMap[xx + yy * MAP_WIDTH]) {
+					std::cout << " ";
+				}
+				else {
+					std::cout << round(log(floodMap[xx + yy * MAP_WIDTH].cost));
+				}
 			}
 			std::cout << std::endl;
-		}*/
+		}
+		for (int rr = 0; rr < MAP_WIDTH; rr++) {
+			std::cout << '-';
+		}
+		*/
 		if (x == ex && y == ey) {
-			floodMap[sx + sy * MAP_WIDTH].move = points.front().origin;
+			floodMap[sx + sy * MAP_WIDTH].move = points.top().origin;
 			break;
 		}
 		points.pop();
 		for (int ix = -1; ix <= 1; ix++) {
 			for (int iy = -1; iy <= 1; iy++) {
-				//bool pass = false;
+				bool pass = false;
 				if (ix == 0 && iy == 0)
-					continue;
+					pass = true;
 				if ((x + ix) < 0 || (x + ix) >= MAP_WIDTH || (y + iy) < 0 || (y + iy) >= MAP_HEIGHT)
-					continue;
-				if (checkMap[(x + ix) + (y + iy)*MAP_WIDTH])
-					continue;
-				if (world->getAt(x + ix, y + iy) != terrain_t::EMPTY)
-					continue;
-				//if (!pass) {
+					pass = true;
+				if (checkMap[(x + ix) + (y + iy)*MAP_WIDTH]) {
+					std::string reportstr = "\nTRIGGERED\n";
+					report(reportstr.data(), reportstr.length());
+					pass = true;
+				}
+				if (isOccupied(x+ix,y+iy,index))
+					pass = true;
+				if (!pass) {
 					intpair_t thispoint(x + ix, y + iy);
-					switch (ix) {
+					/*switch (ix) {
 					case -1:
 						switch (iy) {
 						case -1:
@@ -467,78 +486,115 @@ void Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 							break;
 						}
 						break;
-					}
-					thispoint.parent = x + y * MAP_WIDTH;
+					}*/
+					thispoint.px = x;
+					thispoint.py = y;
+					thispoint.cost = (ex - x) * (ex - x) + (ey - y) * (ey - y);
 					points.push(thispoint);
-				//}
+				}
 			}
 		}
 	}
 	std::string reportstr = "\nMADE IT HERE\n";
 	report(reportstr.data(), reportstr.length());
-	int cx = sx;
-	int cy = sy;
+	int cx = ex;
+	int cy = ey;
+	char move = ' ';
 	bool emergencybrake = false;
-	while (cx != ex && cy != ey) {
-		//std::cout << "cx: " << cx << " cy: " << cy << std::endl;
-		paths.at(index).push_back(floodMap[cx + cy * MAP_WIDTH].move);
-		std::string str = floodMap[cx + cy * MAP_WIDTH].move+"";
-		//report(str.data(), str.length());
-		switch (floodMap[cx + cy * MAP_WIDTH].move) {
-		case 'q':
-			cx--;
-			cy--;
-			break;
-		case 'w':
-			cy--;
-			break;
-		case 'e':
-			cx++;
-			cy--;
-			break;
-		case 'a':
-			cx--;
-			break;
-		case 's':
-			cy++;
-			break;
-		case 'd':
-			cx++;
-			break;
-		case 'z':
-			cx--;
-			cy++;
-			break;
-		case 'c':
-			cx++;
-			cy++;
-			break;
-		default:
-			emergencybrake = true;
+	reportstr = "";
+	while (true) {
+		//std::cout << "(" << cx << ", " << cy << ") "; //<< sx << " " << sy << " " << ex << " " << ey << std::endl;
+		//reportstr = "<" + std::to_string(cx) + "|" + std::to_string(cy) + ">" + reportstr;
+		reportstr += "<" + std::to_string(cx) + "|" + std::to_string(cy) + ">";
+		/*if (cx < 0 || cy < 0)
+			break;*/
+		int nx = floodMap[cx + cy * MAP_WIDTH].px;
+		int ny = floodMap[cx + cy * MAP_WIDTH].py;
+		/*if (nx < 0 || ny < 0)
+			break;*/
+		int i = nx - cx;
+		int j = ny - cy;
+		if (abs(i) + abs(j) > 2 || abs(i) - abs(j) > 1 || isOccupied(cx, cy, index)) {
+			reportstr += "\n\n\nFUCKINGBREAK\n\n\n";
+			//break;
 		}
-		if (emergencybrake)
+		switch (i) {
+		case 0:
+			switch (j) {
+			case 0:
+				move = ' ';
+				break;
+			case -1:
+				move = 'w';
+				break;
+			case 1:
+				move = 's';
+				break;
+			}
 			break;
+		case -1:
+			switch (j) {
+			case 0:
+				move = 'a';
+				break;
+			case -1:
+				move = 'q';
+				break;
+			case 1:
+				move = 'z';
+				break;
+			}
+			break;
+		case 1:
+			switch (j) {
+			case 0:
+				move = 'd';
+				break;
+			case -1:
+				move = 'e';
+				break;
+			case 1:
+				move = 'c';
+				break;
+			}
+			break;
+		}
+		paths.at(index).push_back(move);
+		if (cx == sx && cy == sy) {
+			break;
+		}
+		cx = nx;
+		cy = ny;
 	}
+	report(reportstr.data(), reportstr.length());
+	reportstr = "\nACTOR STARTED AT <" + std::to_string(ex) + "|" + std::to_string(ey) + ">\n";
+	report(reportstr.data(), reportstr.length());
+	reportstr = "\nACTOR IS AT <" + std::to_string(actors->at(index)->getX()) + "|" + std::to_string(actors->at(index)->getY()) + ">\n";
+	report(reportstr.data(), reportstr.length());
+	reportstr = "\nACTOR GOAL AT <" + std::to_string(sx) + "|" + std::to_string(sy) + ">\n";
+	report(reportstr.data(), reportstr.length());
 }
 void Overseer::think(int i, std::string* str_tell) {
 	Actor* actor = actors->at(i);
-	
+
 	int ax = actor->getX();
 	int ay = actor->getY();
-	
+
 
 	std::uniform_int_distribution<> randw(0, MAP_WIDTH);
 	std::uniform_int_distribution<> randh(0, MAP_HEIGHT);
 	std::uniform_int_distribution<> smallw(ax - 10, ax + 10);
 	std::uniform_int_distribution<> smallh(ay - 10, ay + 10);
-	
+	int ex = 0, ey = 0;
 	if (actor->getAIState() == aistate_t::READY) {
-		int ex = randw(rng), ey = randh(rng);
+		ex = randw(rng);
+		ey = randh(rng);
 		while (isOccupied(ex, ey)) {
 			ex = randw(rng);
 			ey = randh(rng);
 		}
-		dijkstraesque(i, ax, ay, ex, ey);
+	
+		dijkstraesque(i, ex, ey, ax, ay);
 		std::string str_report;
 		for (int ii = 0; ii < paths.at(i).size(); ii++) {
 			str_report += paths.at(i).at(ii);
@@ -560,9 +616,9 @@ void Overseer::think(int i, std::string* str_tell) {
 }
 
 void Overseer::update() {
-	std::string str_report = "update\n";
+	std::string str_report = "";
 	std::string str_tell = legend;
-	report(str_report.data(), str_report.length());
+	
 	tell(str_tell.data(), str_tell.length());
 	for (int i = 0; i < actors->size(); i++) {
 		if (actors->at(i)->getAIState()) {
@@ -579,6 +635,8 @@ void Overseer::update() {
 		else {
 			parseInput(i, &str_tell);
 		}
+		str_report += "ACTOR " + std::to_string(i) + " is at <" + std::to_string(actors->at(i)->getX()) + "|" + std::to_string(actors->at(i)->getY()) + ">\n";
+		report(str_report.data(), str_report.length());
 		tell(str_tell.data(), str_tell.length());
 		print();
 	}
@@ -680,6 +738,7 @@ void Overseer::run() {
 				break;
 			}
 		}
+		
 		//input = unparsed[0];
 		
 		switch (input) {
