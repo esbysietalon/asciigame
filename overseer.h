@@ -15,6 +15,7 @@ struct intpair_t {
 	char origin;
 	int px, py;
 	float cost;
+	float scost;
 	intpair_t(int i, int j) {
 		x = i;
 		y = j;

@@ -489,7 +489,12 @@ void Overseer::dijkstraesque(int index, int sx, int sy, int ex, int ey) {
 					}*/
 					thispoint.px = x;
 					thispoint.py = y;
-					thispoint.cost = (ex - thispoint.x) * (ex - thispoint.x) + (ey - thispoint.y) * (ey - thispoint.y) + (sx - thispoint.x) * (sx - thispoint.x) + (sy - thispoint.y) * (sy - thispoint.y);
+					int mcost = 1;
+					if (abs(ix) + abs(iy) > 1)
+						mcost = 1.5;
+					int ecost = abs(ex - thispoint.x) + abs(ey - thispoint.y);
+					thispoint.scost = floodMap[x + y * MAP_WIDTH].scost + mcost;
+					thispoint.cost =  ecost + thispoint.scost;
 					points.push(thispoint);
 				}
 			}
