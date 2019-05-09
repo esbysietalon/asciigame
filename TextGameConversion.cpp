@@ -27,6 +27,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	// this struct holds information for the window class
 	WNDCLASSEX wc;
 
+
+	RECT ws = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
+	AdjustWindowRect(&ws, WS_OVERLAPPEDWINDOW, FALSE);
+
 	// clear out the window class for use
 	ZeroMemory(&wc, sizeof(WNDCLASSEX));
 
@@ -47,10 +51,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
 		L"WindowClass1",    // name of the window class
 		L"Windows Conversion",   // title of the window
 		WS_OVERLAPPEDWINDOW,    // window style
-		300,    // x-position of the window
-		300,    // y-position of the window
-		500,    // width of the window
-		400,    // height of the window
+		10,    // x-position of the window
+		10,    // y-position of the window
+		ws.right - ws.left,    // width of the window
+		ws.bottom - ws.top,    // height of the window
 		NULL,    // we have no parent window, NULL
 		NULL,    // we aren't using menus, NULL
 		hInstance,    // application handle
@@ -65,13 +69,22 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	MSG msg;
 
 	// wait for the next message in the queue, store the result in 'msg'
-	while (GetMessage(&msg, NULL, 0, 0))
+	while (TRUE)
 	{
 		// translate keystroke messages into the right format
-		TranslateMessage(&msg);
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
 
-		// send the message to the WindowProc function
-		DispatchMessage(&msg);
+			// send the message to the WindowProc function
+			DispatchMessage(&msg);
+
+			if (msg.message == WM_QUIT)
+				break;
+		}
+		else {
+
+		}
+		
 	}
 
 	// return this part of the WM_QUIT message to Windows
