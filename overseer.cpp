@@ -84,7 +84,6 @@ void Overseer::init()
 	}
 	world = new Atlas();
 	actors = new std::vector<Actor*>();
-	honeys = new std::vector<intpair_t>();
 	world->create(MAP_WIDTH, MAP_HEIGHT);
 	populate();
 	if(actors->size() > 0)
@@ -552,19 +551,19 @@ void Overseer::think(int i, std::string* str_tell) {
 	int ex = 0, ey = 0;
 	if (actor->getAIState() == aistate_t::READY) {
 		
-		if (honeys->size() > 0) {
+		/*if (honeys->size() > 0) {
 			std::shuffle(honeys->begin(), honeys->end(), rng);
 			ex = honeys->front().x;
 			ey = honeys->front().y;
 		}
-		else {
+		else {*/	
+		ex = randw(rng);
+		ey = randh(rng);
+		while (isOccupied(ex, ey)) {
 			ex = randw(rng);
 			ey = randh(rng);
-			while (isOccupied(ex, ey)) {
-				ex = randw(rng);
-				ey = randh(rng);
-			}
 		}
+		//}
 		if (dijkstraesque(i, ex, ey, ax, ay)) {
 			/*std::string str_report;
 			for (int ii = 0; ii < paths.at(i).size(); ii++) {
@@ -593,9 +592,9 @@ void Overseer::update() {
 	
 	tell(str_tell.data(), str_tell.length());
 	for (int i = 0; i < actors->size(); i++) {
-		if (world->getAt(actors->at(i)->getX(), actors->at(i)->getY()) != terrain_t::HONEY) {
-			world->terraform(actors->at(i)->getX(), actors->at(i)->getY(), terrain_t::EMPTY);
-		}
+		//if (world->getAt(actors->at(i)->getX(), actors->at(i)->getY()) != terrain_t::HONEY) {
+		world->terraform(actors->at(i)->getX(), actors->at(i)->getY(), terrain_t::EMPTY);
+		//}
 		if (actors->at(i)->getAIState()) {
 			think(i, &str_tell);
 			if (paths.at(i).size() > 0) {
@@ -631,17 +630,6 @@ void Overseer::populate(){
 			y = randh(rng);
 		}
 		enterActor(new Actor(x, y));
-	}
-	for (int i = 0; i < HONEY_NUM; i++) {
-		int x = randw(rng);
-		int y = randh(rng);
-
-		while (isOccupied(x, y)) {
-			x = randw(rng);
-			y = randh(rng);
-		}
-		world->terraform(x, y, terrain_t::HONEY);
-		honeys->push_back(intpair_t(x, y));
 	}
 }
 
@@ -686,9 +674,6 @@ void Overseer::print() {
 			CHAR_INFO cinfo;
 			cinfo.Char.AsciiChar = world->getAt(x, y);//(unsigned char)219;
 			cinfo.Attributes = DEFAULTCOLOR;//rand() % 256;
-			if (world->getAt(x, y) == terrain_t::HONEY) {
-				cinfo.Attributes = HONEYCOLOR;
-			}
 			consoleBuffer[x + (MAP_WIDTH) * y] = cinfo;
 		}
 	}
